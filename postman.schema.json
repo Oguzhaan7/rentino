@@ -1,0 +1,1617 @@
+{
+  "info": {
+    "_postman_id": "e21a0e8f-3d42-4a8c-a5e3-728a412f7c9e",
+    "name": "Rentino API",
+    "description": "Rentino emlak ve kira yönetim platformu API dokümantasyonu",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Genel",
+      "item": [
+        {
+          "name": "API Durumu",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            },
+            "description": "API'nin çalışıp çalışmadığını kontrol eder"
+          },
+          "response": []
+        },
+        {
+          "name": "API Sağlık Kontrolü",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "API'nin sağlık durumunu kontrol eder"
+          },
+          "response": []
+        }
+      ],
+      "description": "Genel API kontrol endpointleri"
+    },
+    {
+      "name": "Kimlik Doğrulama",
+      "item": [
+        {
+          "name": "Giriş Yap",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "if(jsonData.token) {\r",
+                  "    pm.environment.set(\"token\", jsonData.token);\r",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"admin@rentino.com\",\r\n  \"password\": \"securepassword\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Kullanıcı girişi yapar ve JWT token alır"
+          },
+          "response": []
+        },
+        {
+          "name": "Kayıt Ol",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"newuser@example.com\",\r\n  \"password\": \"securepassword\",\r\n  \"firstName\": \"Yeni\",\r\n  \"lastName\": \"Kullanıcı\",\r\n  \"phone\": \"+905551234567\",\r\n  \"role\": \"TENANT\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Yeni kullanıcı kaydı oluşturur"
+          },
+          "response": []
+        },
+        {
+          "name": "Profili Getir",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "profile"]
+            },
+            "description": "Kullanıcının profil bilgilerini getirir"
+          },
+          "response": []
+        },
+        {
+          "name": "Profil Güncelle",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"firstName\": \"Güncel\",\r\n  \"lastName\": \"Kullanıcı\",\r\n  \"phone\": \"+905559876543\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "profile"]
+            },
+            "description": "Kullanıcının profil bilgilerini günceller"
+          },
+          "response": []
+        },
+        {
+          "name": "Şifre Değiştir",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"currentPassword\": \"securepassword\",\r\n  \"newPassword\": \"newSecurePassword\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "change-password"]
+            },
+            "description": "Kullanıcı şifresini değiştirir"
+          },
+          "response": []
+        }
+      ],
+      "description": "Kimlik doğrulama ve kullanıcı profili işlemleri",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [""]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [""]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tenant Yönetimi",
+      "item": [
+        {
+          "name": "Tenant Listesi",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants?page=1&limit=10&orderBy=name:asc&search=&isActive=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tenants"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "orderBy",
+                  "value": "name:asc"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "isActive",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Tüm tenantları listeler"
+          },
+          "response": []
+        },
+        {
+          "name": "Tenant Detayı",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tenants", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "tenant-id",
+                  "description": "Tenant ID"
+                }
+              ]
+            },
+            "description": "Tenant detaylarını getirir"
+          },
+          "response": []
+        },
+        {
+          "name": "Tenant Oluştur",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"ABC Emlak\",\r\n  \"domain\": \"abcemlak.com\",\r\n  \"contactEmail\": \"info@abcemlak.com\",\r\n  \"contactPhone\": \"+902121234567\",\r\n  \"address\": \"Örnek Mahallesi, Örnek Sokak No:1, İstanbul\",\r\n  \"isActive\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tenants"]
+            },
+            "description": "Yeni tenant oluşturur"
+          },
+          "response": []
+        },
+        {
+          "name": "Tenant Güncelle",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"ABC Emlak Güncellendi\",\r\n  \"contactEmail\": \"yeni@abcemlak.com\",\r\n  \"contactPhone\": \"+902129876543\",\r\n  \"address\": \"Yeni Adres, İstanbul\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tenants", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "tenant-id",
+                  "description": "Tenant ID"
+                }
+              ]
+            },
+            "description": "Tenant bilgilerini günceller"
+          },
+          "response": []
+        },
+        {
+          "name": "Tenant Sil",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants/:id?permanent=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tenants", ":id"],
+              "query": [
+                {
+                  "key": "permanent",
+                  "value": "false",
+                  "description": "true ise kalıcı siler, false ise pasife alır"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "tenant-id",
+                  "description": "Tenant ID"
+                }
+              ]
+            },
+            "description": "Tenant'ı siler veya pasife alır"
+          },
+          "response": []
+        },
+        {
+          "name": "Tenant İstatistikleri",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tenants/:id/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tenants", ":id", "stats"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "tenant-id",
+                  "description": "Tenant ID"
+                }
+              ]
+            },
+            "description": "Tenant ile ilgili istatistikleri getirir"
+          },
+          "response": []
+        }
+      ],
+      "description": "Tenant (kiracı kuruluş) yönetimi işlemleri",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [""]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [""]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bina Yönetimi",
+      "item": [
+        {
+          "name": "Bina Listesi",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/buildings?page=1&limit=10&orderBy=name:asc&search=&isActive=true&city=&district=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "buildings"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "orderBy",
+                  "value": "name:asc"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "isActive",
+                  "value": "true"
+                },
+                {
+                  "key": "city",
+                  "value": ""
+                },
+                {
+                  "key": "district",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Tüm binaları listeler"
+          },
+          "response": []
+        },
+        {
+          "name": "Bina Detayı",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/buildings/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "buildings", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "building-id",
+                  "description": "Bina ID"
+                }
+              ]
+            },
+            "description": "Bina detaylarını getirir"
+          },
+          "response": []
+        },
+        {
+          "name": "Bina Oluştur",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Örnek Apartmanı\",\r\n  \"address\": \"Örnek Mahallesi, Örnek Sokak No:1\",\r\n  \"city\": \"İstanbul\",\r\n  \"district\": \"Kadıköy\",\r\n  \"totalUnits\": 20,\r\n  \"constructionYear\": 2010,\r\n  \"isActive\": true,\r\n  \"managerId\": \"manager-user-id\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/buildings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "buildings"]
+            },
+            "description": "Yeni bina oluşturur"
+          },
+          "response": []
+        },
+        {
+          "name": "Bina Güncelle",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Örnek Apartmanı (Güncellendi)\",\r\n  \"address\": \"Güncel Adres Bilgisi\",\r\n  \"city\": \"İstanbul\",\r\n  \"district\": \"Şişli\",\r\n  \"totalUnits\": 25,\r\n  \"managerId\": \"new-manager-id\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/buildings/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "buildings", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "building-id",
+                  "description": "Bina ID"
+                }
+              ]
+            },
+            "description": "Bina bilgilerini günceller"
+          },
+          "response": []
+        },
+        {
+          "name": "Bina Sil",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/buildings/:id?permanent=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "buildings", ":id"],
+              "query": [
+                {
+                  "key": "permanent",
+                  "value": "false",
+                  "description": "true ise kalıcı siler, false ise pasife alır"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "building-id",
+                  "description": "Bina ID"
+                }
+              ]
+            },
+            "description": "Bina kaydını siler veya pasife alır"
+          },
+          "response": []
+        },
+        {
+          "name": "Bina Gideri Ekle",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"Asansör Bakımı\",\r\n  \"description\": \"Aylık rutin asansör bakım ödemesi\",\r\n  \"amount\": 1500,\r\n  \"expenseDate\": \"2023-05-15T14:00:00.000Z\",\r\n  \"expenseType\": \"MAINTENANCE\",\r\n  \"invoiceNumber\": \"A12345\",\r\n  \"paidAt\": \"2023-05-15T14:00:00.000Z\",\r\n  \"isPaid\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/buildings/:buildingId/expenses",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "buildings", ":buildingId", "expenses"],
+              "variable": [
+                {
+                  "key": "buildingId",
+                  "value": "building-id",
+                  "description": "Bina ID"
+                }
+              ]
+            },
+            "description": "Binaya gider ekler"
+          },
+          "response": []
+        },
+        {
+          "name": "Aidat Tanımla",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"period\": \"2023-05-01T00:00:00.000Z\",\r\n  \"amount\": 350,\r\n  \"dueDate\": \"2023-05-15T00:00:00.000Z\",\r\n  \"description\": \"Mayıs 2023 Aidatı\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/buildings/:buildingId/dues",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "buildings", ":buildingId", "dues"],
+              "variable": [
+                {
+                  "key": "buildingId",
+                  "value": "building-id",
+                  "description": "Bina ID"
+                }
+              ]
+            },
+            "description": "Binaya aidat tanımlar"
+          },
+          "response": []
+        },
+        {
+          "name": "Bina İstatistikleri",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/buildings/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "buildings", "stats"]
+            },
+            "description": "Bina istatistiklerini getirir"
+          },
+          "response": []
+        }
+      ],
+      "description": "Bina yönetimi işlemleri",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [""]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [""]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mülk Yönetimi",
+      "item": [
+        {
+          "name": "Mülk Listesi",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/properties?page=1&limit=10&orderBy=createdAt:desc&search=&status=&type=&city=&district=&minArea=&maxArea=&minRooms=&maxRooms=&buildingId=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "properties"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "orderBy",
+                  "value": "createdAt:desc"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "status",
+                  "value": ""
+                },
+                {
+                  "key": "type",
+                  "value": ""
+                },
+                {
+                  "key": "city",
+                  "value": ""
+                },
+                {
+                  "key": "district",
+                  "value": ""
+                },
+                {
+                  "key": "minArea",
+                  "value": ""
+                },
+                {
+                  "key": "maxArea",
+                  "value": ""
+                },
+                {
+                  "key": "minRooms",
+                  "value": ""
+                },
+                {
+                  "key": "maxRooms",
+                  "value": ""
+                },
+                {
+                  "key": "buildingId",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Tüm mülkleri listeler"
+          },
+          "response": []
+        },
+        {
+          "name": "Mülk Detayı",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/properties/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "properties", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "property-id",
+                  "description": "Mülk ID"
+                }
+              ]
+            },
+            "description": "Mülk detaylarını getirir"
+          },
+          "response": []
+        },
+        {
+          "name": "Mülk Oluştur",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"3+1 Daire\",\r\n  \"type\": \"APARTMENT\",\r\n  \"status\": \"AVAILABLE\",\r\n  \"address\": \"Örnek Mah. Örnek Sokak No:1 Daire:5\",\r\n  \"city\": \"İstanbul\",\r\n  \"district\": \"Kadıköy\",\r\n  \"postalCode\": \"34720\",\r\n  \"totalArea\": 120,\r\n  \"yearBuilt\": 2015,\r\n  \"numberOfRooms\": 3,\r\n  \"numberOfBaths\": 1,\r\n  \"floor\": 2,\r\n  \"description\": \"Ferah ve aydınlık bir daire\",\r\n  \"buildingId\": \"building-id\",\r\n  \"isActive\": true,\r\n  \"ownerId\": \"owner-user-id\",\r\n  \"tenantId\": null\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/properties",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "properties"]
+            },
+            "description": "Yeni mülk oluşturur"
+          },
+          "response": []
+        },
+        {
+          "name": "Mülk Güncelle",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"3+1 Lüks Daire\",\r\n  \"status\": \"AVAILABLE\",\r\n  \"address\": \"Güncel Adres Bilgisi\",\r\n  \"description\": \"Ferah, aydınlık ve yenilenmiş bir daire\",\r\n  \"buildingId\": \"new-building-id\",\r\n  \"ownerId\": \"owner-user-id\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/properties/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "properties", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "property-id",
+                  "description": "Mülk ID"
+                }
+              ]
+            },
+            "description": "Mülk bilgilerini günceller"
+          },
+          "response": []
+        },
+        {
+          "name": "Mülk Sil",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/properties/:id?permanent=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "properties", ":id"],
+              "query": [
+                {
+                  "key": "permanent",
+                  "value": "false",
+                  "description": "true ise kalıcı siler, false ise pasife alır"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "property-id",
+                  "description": "Mülk ID"
+                }
+              ]
+            },
+            "description": "Mülk kaydını siler veya pasife alır"
+          },
+          "response": []
+        },
+        {
+          "name": "Mülk Belge Ekle",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"Tapu Belgesi\",\r\n  \"type\": \"DEED\",\r\n  \"fileUrl\": \"https://storage.example.com/documents/deed_123.pdf\",\r\n  \"fileName\": \"deed_123.pdf\",\r\n  \"fileType\": \"application/pdf\",\r\n  \"fileSize\": 1502345,\r\n  \"description\": \"Mülke ait tapu belgesi\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/properties/:propertyId/documents",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "properties", ":propertyId", "documents"],
+              "variable": [
+                {
+                  "key": "propertyId",
+                  "value": "property-id",
+                  "description": "Mülk ID"
+                }
+              ]
+            },
+            "description": "Mülke belge ekler"
+          },
+          "response": []
+        },
+        {
+          "name": "Mülk Bakım Kaydı Ekle",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"Kombi Bakımı\",\r\n  \"description\": \"Yıllık rutin kombi bakımı\",\r\n  \"maintenanceDate\": \"2023-05-10T10:00:00.000Z\",\r\n  \"cost\": 750,\r\n  \"status\": \"COMPLETED\",\r\n  \"notes\": \"Servis teknisyeni tarafından yapıldı\",\r\n  \"performedBy\": \"ABC Kombi Servisi\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/properties/:propertyId/maintenance",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "properties", ":propertyId", "maintenance"],
+              "variable": [
+                {
+                  "key": "propertyId",
+                  "value": "property-id",
+                  "description": "Mülk ID"
+                }
+              ]
+            },
+            "description": "Mülke bakım kaydı ekler"
+          },
+          "response": []
+        }
+      ],
+      "description": "Mülk yönetimi işlemleri",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [""]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [""]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sözleşme Yönetimi",
+      "item": [
+        {
+          "name": "Sözleşme Listesi",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/contracts?page=1&limit=10&orderBy=startDate:desc&search=&status=&propertyId=&tenantId=&startDate=&endDate=&isActive=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contracts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "orderBy",
+                  "value": "startDate:desc"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "status",
+                  "value": ""
+                },
+                {
+                  "key": "propertyId",
+                  "value": ""
+                },
+                {
+                  "key": "tenantId",
+                  "value": ""
+                },
+                {
+                  "key": "startDate",
+                  "value": ""
+                },
+                {
+                  "key": "endDate",
+                  "value": ""
+                },
+                {
+                  "key": "isActive",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Tüm kira sözleşmelerini listeler"
+          },
+          "response": []
+        },
+        {
+          "name": "Sözleşme Detayı",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/contracts/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contracts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "contract-id",
+                  "description": "Sözleşme ID"
+                }
+              ]
+            },
+            "description": "Sözleşme detaylarını getirir"
+          },
+          "response": []
+        },
+        {
+          "name": "Sözleşme Oluştur",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"3+1 Kadıköy Daire Kira Sözleşmesi\",\r\n  \"propertyId\": \"property-id\",\r\n  \"tenantId\": \"tenant-user-id\",\r\n  \"startDate\": \"2023-06-01T00:00:00.000Z\",\r\n  \"endDate\": \"2024-06-01T00:00:00.000Z\",\r\n  \"monthlyRent\": 8500,\r\n  \"depositAmount\": 17000,\r\n  \"paymentDay\": 5,\r\n  \"paymentMethod\": \"BANK_TRANSFER\",\r\n  \"renewalType\": \"AUTOMATIC\",\r\n  \"noticePeriod\": 30,\r\n  \"notes\": \"Yıllık kira artışı TÜFE oranında yapılacaktır.\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/contracts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contracts"]
+            },
+            "description": "Yeni kira sözleşmesi oluşturur"
+          },
+          "response": []
+        },
+        {
+          "name": "Sözleşme Güncelle",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"Kadıköy Daire Kira Sözleşmesi - Güncellendi\",\r\n  \"monthlyRent\": 9000,\r\n  \"paymentDay\": 10,\r\n  \"notes\": \"Güncellenen sözleşme şartları: Yıllık kira artışı TÜFE+5 oranında yapılacaktır.\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/contracts/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contracts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "contract-id",
+                  "description": "Sözleşme ID"
+                }
+              ]
+            },
+            "description": "Sözleşme bilgilerini günceller"
+          },
+          "response": []
+        },
+        {
+          "name": "Sözleşme Sil",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/contracts/:id?permanent=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contracts", ":id"],
+              "query": [
+                {
+                  "key": "permanent",
+                  "value": "false",
+                  "description": "true ise kalıcı siler, false ise iptal eder (sonlandırır)"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "contract-id",
+                  "description": "Sözleşme ID"
+                }
+              ]
+            },
+            "description": "Sözleşmeyi siler veya iptal eder"
+          },
+          "response": []
+        },
+        {
+          "name": "Sözleşme Sonlandır",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"terminationReason\": \"Kiracı taşınıyor\",\r\n  \"terminationDate\": \"2023-06-15T00:00:00.000Z\",\r\n  \"penaltyAmount\": 0,\r\n  \"returnDepositAmount\": 17000,\r\n  \"notes\": \"Karşılıklı anlaşma ile sözleşme sonlandırılmıştır.\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/contracts/:id/terminate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contracts", ":id", "terminate"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "contract-id",
+                  "description": "Sözleşme ID"
+                }
+              ]
+            },
+            "description": "Sözleşmeyi sonlandırır"
+          },
+          "response": []
+        },
+        {
+          "name": "Sözleşme Yenile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"startDate\": \"2024-06-01T00:00:00.000Z\",\r\n  \"endDate\": \"2025-06-01T00:00:00.000Z\",\r\n  \"monthlyRent\": 10000,\r\n  \"depositAmount\": 20000,\r\n  \"notes\": \"Sözleşme yeni dönem için yenilenmiştir.\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/contracts/:id/renew",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contracts", ":id", "renew"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "contract-id",
+                  "description": "Sözleşme ID"
+                }
+              ]
+            },
+            "description": "Sözleşmeyi yeniler"
+          },
+          "response": []
+        },
+        {
+          "name": "Kira Ödemesi Ekle",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"amount\": 8500,\r\n  \"paymentDate\": \"2023-06-05T10:00:00.000Z\",\r\n  \"paymentMethod\": \"BANK_TRANSFER\",\r\n  \"periodStartDate\": \"2023-06-01T00:00:00.000Z\",\r\n  \"periodEndDate\": \"2023-06-30T23:59:59.000Z\",\r\n  \"receiptNumber\": \"R12345\",\r\n  \"isPaid\": true,\r\n  \"notes\": \"Haziran 2023 kira ödemesi\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/contracts/:contractId/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contracts", ":contractId", "payments"],
+              "variable": [
+                {
+                  "key": "contractId",
+                  "value": "contract-id",
+                  "description": "Sözleşme ID"
+                }
+              ]
+            },
+            "description": "Sözleşmeye kira ödemesi ekler"
+          },
+          "response": []
+        },
+        {
+          "name": "Kira Ödemesi Güncelle",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"amount\": 8500,\r\n  \"paymentDate\": \"2023-06-07T14:30:00.000Z\",\r\n  \"isPaid\": true,\r\n  \"notes\": \"Haziran 2023 kira ödemesi - güncellendi\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/contracts/:contractId/payments/:paymentId",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "contracts",
+                ":contractId",
+                "payments",
+                ":paymentId"
+              ],
+              "variable": [
+                {
+                  "key": "contractId",
+                  "value": "contract-id",
+                  "description": "Sözleşme ID"
+                },
+                {
+                  "key": "paymentId",
+                  "value": "payment-id",
+                  "description": "Ödeme ID"
+                }
+              ]
+            },
+            "description": "Kira ödemesini günceller"
+          },
+          "response": []
+        },
+        {
+          "name": "Kira Ödemesi Sil",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/contracts/:contractId/payments/:paymentId",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "contracts",
+                ":contractId",
+                "payments",
+                ":paymentId"
+              ],
+              "variable": [
+                {
+                  "key": "contractId",
+                  "value": "contract-id",
+                  "description": "Sözleşme ID"
+                },
+                {
+                  "key": "paymentId",
+                  "value": "payment-id",
+                  "description": "Ödeme ID"
+                }
+              ]
+            },
+            "description": "Kira ödemesini siler"
+          },
+          "response": []
+        }
+      ],
+      "description": "Sözleşme yönetimi ve kira ödemeleri işlemleri",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{token}}",
+            "type": "string"
+          }
+        ]
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [""]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [""]
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
+}
