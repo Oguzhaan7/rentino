@@ -50,8 +50,19 @@ export const useUserStore = defineStore("user", () => {
   const canManageContracts = computed(
     () => isAdmin.value || isPropertyOwner.value || isManager.value
   );
-
   const canViewFinancials = computed(
+    () => isAdmin.value || isPropertyOwner.value || isAccountant.value
+  );
+
+  const canManagePayments = computed(
+    () => isAdmin.value || isAccountant.value || isManager.value
+  );
+
+  const canViewInvoices = computed(
+    () => isAdmin.value || isPropertyOwner.value || isAccountant.value
+  );
+
+  const canViewExpenses = computed(
     () => isAdmin.value || isPropertyOwner.value || isAccountant.value
   );
 
@@ -161,6 +172,9 @@ export const useUserStore = defineStore("user", () => {
     canManageProperties,
     canManageContracts,
     canViewFinancials,
+    canManagePayments,
+    canViewInvoices,
+    canViewExpenses,
     canManageUsers,
     canViewReports,
     canManageTenants,

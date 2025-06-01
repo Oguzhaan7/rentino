@@ -8,11 +8,10 @@ export default async function buildingRoutes(
   const auth = {
     preHandler: fastify.authenticate,
   };
-
   const buildingManagerAuth = {
     preHandler: [
       fastify.authenticate,
-      fastify.requireRoles(["ADMIN", "MANAGER"]),
+      fastify.requireRoles(["ADMIN", "MANAGER", "PROPERTY_OWNER"]),
     ],
   };
 

@@ -24,6 +24,7 @@ model User {
   firstName    String?
   lastName     String?
   phone        String?
+  avatar       String?
   role         UserRole  @default(TENANT)
   isActive     Boolean   @default(true)
   createdAt    DateTime  @default(now())
@@ -51,8 +52,22 @@ model User {
   Report              Report[]
   ReportGeneration    ReportGeneration[]
   passwordResets      PasswordReset[]
+  settings            UserSettings?
 
   @@unique([email, tenantId])
+}
+
+model UserSettings {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  language     String   @default("tr")
+  theme        String   @default("light") // "light" or "dark"
+  timezone     String   @default("Europe/Istanbul")
+  notifications Json    @default("{\"email\": true, \"browser\": true, \"sms\": false}")
+  dashboard    Json     @default("{\"showWelcome\": true, \"compactMode\": false}")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 // =========== GAYRİMENKUL YÖNETİMİ ===========

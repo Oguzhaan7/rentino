@@ -36,7 +36,6 @@ export const buildingService = {
         isActive = true,
         managerId,
       } = request.body;
-
       const user = requireAuth(request);
       const tenantId = requireTenant(request);
 

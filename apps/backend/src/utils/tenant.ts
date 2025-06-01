@@ -40,8 +40,14 @@ export function createTenantAwareWhere(
   };
 }
 
-export function requireTenant(request: FastifyRequest): string {
+export function requireTenant(request: FastifyRequest): string | null {
   const tenantId = getTenantId(request);
+  const admin = isAdmin(request);
+
+  if (admin) {
+    return tenantId || null;
+  }
+
   if (!tenantId) {
     throw new Error("Tenant ID gerekli");
   }

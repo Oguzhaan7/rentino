@@ -26,6 +26,7 @@ export const propertySchemas = {
         floor: { type: "integer" },
         description: { type: "string" },
         buildingId: { type: "string" },
+        ownerId: { type: "string" },
         isActive: { type: "boolean", default: true },
       },
     },

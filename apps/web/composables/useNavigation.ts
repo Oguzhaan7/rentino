@@ -1,18 +1,20 @@
 import {
   SquareTerminal,
-  Bot,
-  BookOpen,
-  Settings2,
-  Frame,
   Building,
   Users,
-  FileText,
   DollarSign,
   BarChart3,
   Home,
   Wrench,
   CreditCard,
   Receipt,
+  UserCheck,
+  Building2,
+  TrendingUp,
+  PieChart,
+  Calculator,
+  Settings2,
+  ReceiptText,
   type LucideIcon,
 } from "lucide-vue-next";
 
@@ -32,11 +34,14 @@ export const useNavigation = () => {
     const navMain: NavigationItem[] = [
       {
         title: "Dashboard",
-        url: "/",
+        url: "/dashboard",
         icon: SquareTerminal,
         isActive: true,
       },
     ];
+
+    // Properties - Available for ADMIN, PROPERTY_OWNER, MANAGER
+    // Backend: POST/GET/PUT/DELETE /api/properties, /api/properties/:id, /api/properties/stats
     if (userStore.canManageProperties) {
       navMain.push({
         title: "Mülkler",
@@ -53,102 +58,131 @@ export const useNavigation = () => {
             url: "/properties/create",
             icon: Building,
           },
+          {
+            title: "Mülk İstatistikleri",
+            url: "/properties/stats",
+            icon: BarChart3,
+          },
         ],
       });
     }
 
-    if (userStore.canManageBuildings) {
+    // Buildings - Available for ADMIN, MANAGER only (Backend restriction)
+    // Backend: POST/GET/PUT/DELETE /api/buildings, /api/buildings/:id, /api/buildings/stats
+    if (
+      userStore.user?.role === "ADMIN" ||
+      userStore.user?.role === "MANAGER"
+    ) {
       navMain.push({
         title: "Binalar",
         url: "/buildings",
-        icon: BookOpen,
+        icon: Building2,
         items: [
           {
             title: "Tüm Binalar",
             url: "/buildings",
-            icon: BookOpen,
+            icon: Building2,
           },
           {
             title: "Yeni Bina",
             url: "/buildings/create",
-            icon: BookOpen,
+            icon: Building2,
+          },
+          {
+            title: "Bina İstatistikleri",
+            url: "/buildings/stats",
+            icon: BarChart3,
           },
         ],
       });
     }
 
+    // Contracts - Available for ADMIN, PROPERTY_OWNER, MANAGER
+    // Backend: POST/GET/PUT/DELETE /api/contracts, /api/contracts/:id
     if (userStore.canManageContracts) {
       navMain.push({
         title: "Sözleşmeler",
         url: "/contracts",
-        icon: FileText,
+        icon: ReceiptText,
         items: [
           {
             title: "Aktif Sözleşmeler",
-            url: "/contracts?status=ACTIVE",
-            icon: FileText,
+            url: "/contracts?status=active",
+            icon: ReceiptText,
           },
           {
-            title: "Süresi Dolan",
-            url: "/contracts?status=EXPIRED",
-            icon: FileText,
+            title: "Sona Eren Sözleşmeler",
+            url: "/contracts?status=expired",
+            icon: ReceiptText,
           },
           {
             title: "Yeni Sözleşme",
             url: "/contracts/create",
-            icon: FileText,
+            icon: ReceiptText,
           },
         ],
       });
     }
-    if (userStore.canViewFinancials) {
+
+    // Finance - Role-based access with proper backend permissions
+    const financeItems: NavigationItem[] = [];
+
+    // Payments - Available for ADMIN, MANAGER, ACCOUNTANT
+    if (
+      userStore.user?.role === "ADMIN" ||
+      userStore.user?.role === "MANAGER" ||
+      userStore.user?.role === "ACCOUNTANT"
+    ) {
+      financeItems.push({
+        title: "Ödemeler",
+        url: "/finance/payments",
+        icon: CreditCard,
+      });
+    }
+
+    // General Finance - Available for ADMIN, PROPERTY_OWNER, ACCOUNTANT
+    if (
+      userStore.user?.role === "ADMIN" ||
+      userStore.user?.role === "PROPERTY_OWNER" ||
+      userStore.user?.role === "ACCOUNTANT"
+    ) {
+      financeItems.push(
+        {
+          title: "Faturalar",
+          url: "/finance/invoices",
+          icon: Receipt,
+        },
+        {
+          title: "Giderler",
+          url: "/finance/expenses",
+          icon: Calculator,
+        }
+      );
+    }
+
+    // Building Finance - Available for ADMIN, MANAGER, ACCOUNTANT
+    if (
+      userStore.user?.role === "ADMIN" ||
+      userStore.user?.role === "MANAGER" ||
+      userStore.user?.role === "ACCOUNTANT"
+    ) {
+      financeItems.push({
+        title: "Bina Giderleri",
+        url: "/finance/building-expenses",
+        icon: Building2,
+      });
+    }
+
+    if (financeItems.length > 0) {
       navMain.push({
         title: "Mali İşlemler",
         url: "/finance",
         icon: DollarSign,
-        items: [
-          {
-            title: "Ödemeler",
-            url: "/finance/payments",
-            icon: CreditCard,
-          },
-          {
-            title: "Faturalar",
-            url: "/finance/invoices",
-            icon: Receipt,
-          },
-          {
-            title: "Giderler",
-            url: "/finance/expenses",
-            icon: DollarSign,
-          },
-        ],
+        items: financeItems,
       });
     }
-    if (userStore.isTenant) {
-      navMain.push({
-        title: "Kira Bilgilerim",
-        url: "/my-rental",
-        icon: Home,
-        items: [
-          {
-            title: "Sözleşmem",
-            url: "/my-rental/contract",
-            icon: FileText,
-          },
-          {
-            title: "Ödemelerim",
-            url: "/my-rental/payments",
-            icon: CreditCard,
-          },
-          {
-            title: "Bakım Talepleri",
-            url: "/my-rental/maintenance",
-            icon: Wrench,
-          },
-        ],
-      });
-    }
+
+    // Reports - Available for ADMIN, PROPERTY_OWNER, MANAGER, ACCOUNTANT
     if (userStore.canViewReports) {
       navMain.push({
         title: "Raporlar",
@@ -158,12 +192,12 @@ export const useNavigation = () => {
           {
             title: "Gelir Raporu",
             url: "/reports/income",
-            icon: DollarSign,
+            icon: TrendingUp,
           },
           {
             title: "Doluluk Raporu",
             url: "/reports/occupancy",
-            icon: BarChart3,
+            icon: PieChart,
           },
           {
             title: "Bakım Raporu",
@@ -173,7 +207,10 @@ export const useNavigation = () => {
         ],
       });
     }
-    if (userStore.canManageUsers) {
+
+    // User Management - ADMIN only
+    // Backend: Need to implement /api/users endpoints
+    if (userStore.user?.role === "ADMIN") {
       navMain.push({
         title: "Kullanıcı Yönetimi",
         url: "/users",
@@ -192,64 +229,117 @@ export const useNavigation = () => {
           {
             title: "Roller",
             url: "/users/roles",
-            icon: Settings2,
+            icon: UserCheck,
           },
         ],
       });
     }
 
-    if (userStore.canManageTenants) {
+    // Tenant Management - ADMIN only
+    // Backend: /api/tenants endpoints available
+    if (userStore.user?.role === "ADMIN") {
       navMain.push({
-        title: "Tenant Yönetimi",
+        title: "Kiracı Yönetimi",
         url: "/tenants",
-        icon: Bot,
+        icon: UserCheck,
         items: [
           {
-            title: "Tüm Tenantlar",
+            title: "Tüm Kiracılar",
             url: "/tenants",
-            icon: Bot,
+            icon: UserCheck,
           },
           {
-            title: "Yeni Tenant",
+            title: "Yeni Kiracı",
             url: "/tenants/create",
-            icon: Bot,
+            icon: UserCheck,
           },
         ],
       });
     }
-    const projects = [
-      {
-        name: "Ayarlar",
-        url: "/settings",
-        icon: Frame,
-      },
-    ];
+
+    // For TENANT role - My Rental info
+    // Backend: Need to implement tenant-specific /api/my/* endpoints
+    if (userStore.user?.role === "TENANT") {
+      navMain.push({
+        title: "Kiralama Bilgilerim",
+        url: "/my-rental",
+        icon: Home,
+        items: [
+          {
+            title: "Sözleşme Detayları",
+            url: "/my-rental/contract",
+            icon: Contract,
+          },
+          {
+            title: "Ödeme Geçmişi",
+            url: "/my-rental/payments",
+            icon: CreditCard,
+          },
+          {
+            title: "Bakım Talepleri",
+            url: "/my-rental/maintenance",
+            icon: Wrench,
+          },
+        ],
+      });
+    }
+
+    // Settings - Available for all authenticated users
+    // Backend: Need to implement /api/settings endpoints
+    navMain.push({
+      title: "Ayarlar",
+      url: "/settings",
+      icon: Settings2,
+      items: [
+        {
+          title: "Profil",
+          url: "/settings/profile",
+          icon: Settings2,
+        },
+        {
+          title: "Hesap",
+          url: "/settings/account",
+          icon: Settings2,
+        },
+        {
+          title: "Bildirimler",
+          url: "/settings/notifications",
+          icon: Settings2,
+        },
+      ],
+    });
+
+    const projects: NavigationItem[] = [];
+
+    const user = {
+      name:
+        userStore.user?.firstName && userStore.user?.lastName
+          ? `${userStore.user.firstName} ${userStore.user.lastName}`
+          : userStore.user?.email || "Kullanıcı",
+      email: userStore.user?.email || "",
+      avatar: userStore.user?.avatar || "/avatars/default.jpg",
+    };
+
     return {
       navMain,
       projects,
-      user: {
-        name:
-          userStore.user?.firstName && userStore.user?.lastName
-            ? `${userStore.user.firstName} ${userStore.user.lastName}`
-            : userStore.user?.email?.split("@")[0] || "Kullanıcı",
-        email: userStore.user?.email || "",
-        avatar: "/avatars/default.jpg",
-      },
+      user,
     };
   };
+
   const canAccessRoute = (route: string): boolean => {
     const authToken = useCookie<string | null>("auth_token");
     if (!authToken.value) return false;
 
     if (!userStore.user) {
-      const basicRoutes = ["/", "/settings"];
+      const basicRoutes = ["/dashboard", "/settings"];
       return basicRoutes.includes(route);
     }
 
     const allowedRoutes = getMenuItemsForRole(userStore.user.role);
 
     const routeMap: Record<string, string> = {
-      "/": "dashboard",
+      "/dashboard": "dashboard",
       "/properties": "properties",
       "/buildings": "buildings",
       "/contracts": "contracts",
@@ -281,7 +371,6 @@ export const useNavigation = () => {
       PROPERTY_OWNER: [
         "dashboard",
         "properties",
-        "buildings",
         "contracts",
         "finance",
         "reports",
@@ -292,6 +381,7 @@ export const useNavigation = () => {
         "properties",
         "buildings",
         "contracts",
+        "finance",
         "reports",
         "settings",
       ],

@@ -53,7 +53,6 @@ export default async function tenantRoutes(
     },
     tenantService.deleteTenant
   );
-
   fastify.get(
     "/:id/stats",
     {

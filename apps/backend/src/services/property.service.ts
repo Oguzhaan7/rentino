@@ -16,12 +16,29 @@ export const propertyService = {
       const user = requireAuth(request);
       const data = request.body as any;
 
+      // Validate required fields
+      if (
+        !data.title ||
+        !data.type ||
+        !data.address ||
+        !data.city ||
+        !data.district ||
+        !data.totalArea
+      ) {
+        return reply.status(400).send({
+          error: "Gerekli alanlar eksik",
+          details:
+            "Başlık, tür, adres, şehir, ilçe ve toplam alan alanları zorunludur",
+        });
+      } // Set ownerId if not provided (default to current user)
+      const propertyData = {
+        ...data,
+        ownerId: data.ownerId || user.id,
+        tenantId,
+      };
+
       const property = await prisma.property.create({
-        data: {
-          ...data,
-          tenantId,
-          createdBy: user.id,
-        },
+        data: propertyData,
         include: {
           owner: {
             select: {
@@ -60,6 +77,30 @@ export const propertyService = {
       return property;
     } catch (error) {
       request.log.error(`Create property error: ${error}`);
+
+      // Handle Prisma validation errors
+      if (error instanceof Prisma.PrismaClientValidationError) {
+        return reply.status(400).send({
+          error: "Geçersiz veri formatı",
+          details: error.message,
+        });
+      }
+
+      // Handle unique constraint errors
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2002") {
+          return reply.status(409).send({
+            error: "Bu bilgilerle zaten bir mülk mevcut",
+          });
+        }
+        if (error.code === "P2003") {
+          return reply.status(400).send({
+            error: "Bağlantılı kayıt bulunamadı",
+            details: "Belirtilen bina veya kullanıcı bulunamadı",
+          });
+        }
+      }
+
       return reply
         .status(500)
         .send({ error: "Mülk oluşturulurken bir hata oluştu" });
@@ -246,13 +287,9 @@ export const propertyService = {
           error: "Bu mülke erişim yetkiniz yok",
         });
       }
-
       const property = await prisma.property.update({
         where: { id },
-        data: {
-          ...data,
-          updatedBy: user.id,
-        },
+        data: data,
         include: {
           owner: {
             select: {
