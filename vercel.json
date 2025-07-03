@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "apps/web/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": ".output/public"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/apps/web/.output/server/index.mjs"
+    }
+  ],
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm --filter=nuxt-app build"
+}

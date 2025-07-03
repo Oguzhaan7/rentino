@@ -1,0 +1,22 @@
+{
+  "name": "rentino",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=nuxt-app",
+    "dev:backend": "turbo run dev --filter=backend",
+    "build": "turbo run build",
+    "build:web": "turbo run build --filter=nuxt-app",
+    "build:backend": "turbo run build --filter=backend",
+    "lint": "turbo run lint",
+    "vercel-build": "pnpm build:web",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "turbo": "^2.0.0"
+  },
+  "packageManager": "pnpm@10.12.3"
+}

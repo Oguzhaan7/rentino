@@ -1,0 +1,884 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =========== KULLANICI YÖNETİMİ ===========
+
+enum UserRole {
+  ADMIN
+  PROPERTY_OWNER
+  TENANT
+  ACCOUNTANT
+  MANAGER
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  firstName    String?
+  lastName     String?
+  phone        String?
+  avatar       String?
+  role         UserRole  @default(TENANT)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastLogin    DateTime?
+
+  // İlişkiler
+  ownedProperties     Property[]                @relation("PropertyOwner")
+  managedBuildings    Building[]                @relation("BuildingManager")
+  tenancies           RentalContract[]          @relation("Tenant")
+  maintenanceRequests MaintenanceRequest[]      @relation("RequestedBy")
+  assignedTasks       MaintenanceTask[]         @relation("AssignedTo")
+  documents           Document[]                @relation("DocumentOwner")
+  transactions        Transaction[]             @relation("TransactionUser")
+  tenantId            String?
+  tenant              Tenant?                   @relation(fields: [tenantId], references: [id])
+  notifications       Notification[]
+  calendarEvents      CalendarEvent[]
+  conversations       ConversationParticipant[]
+  auditLogs           AuditLog[]
+  sessions            Session[]
+  EventAttendee       EventAttendee[]
+  LegalCase           LegalCase[]
+  Message             Message[]
+  Report              Report[]
+  ReportGeneration    ReportGeneration[]
+  passwordResets      PasswordReset[]
+  settings            UserSettings?
+
+  @@unique([email, tenantId])
+}
+
+model UserSettings {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  language     String   @default("tr")
+  theme        String   @default("light") // "light" or "dark"
+  timezone     String   @default("Europe/Istanbul")
+  notifications Json    @default("{\"email\": true, \"browser\": true, \"sms\": false}")
+  dashboard    Json     @default("{\"showWelcome\": true, \"compactMode\": false}")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// =========== GAYRİMENKUL YÖNETİMİ ===========
+
+enum PropertyType {
+  APARTMENT
+  HOUSE
+  OFFICE
+  SHOP
+  LAND
+  WAREHOUSE
+}
+
+enum PropertyStatus {
+  AVAILABLE
+  RENTED
+  UNDER_MAINTENANCE
+  ON_SALE
+  SOLD
+}
+
+model Property {
+  id            String         @id @default(uuid())
+  title         String
+  type          PropertyType
+  status        PropertyStatus @default(AVAILABLE)
+  address       String
+  city          String
+  district      String
+  postalCode    String?
+  totalArea     Float
+  yearBuilt     Int?
+  numberOfRooms Int?
+  numberOfBaths Int?
+  floor         Int?
+  description   String?
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  // İlişkiler
+  ownerId         String
+  owner           User                  @relation("PropertyOwner", fields: [ownerId], references: [id])
+  buildingId      String?
+  building        Building?             @relation(fields: [buildingId], references: [id])
+  documents       PropertyDocument[]
+  maintenances    PropertyMaintenance[]
+  rentalContracts RentalContract[]
+  tenantId        String?
+  tenant          Tenant?               @relation(fields: [tenantId], references: [id])
+  legalCases      LegalCase[]
+}
+
+model PropertyDocument {
+  id          String   @id @default(uuid())
+  title       String
+  type        String // Tapu, iskan, vs.
+  fileUrl     String
+  fileName    String
+  fileType    String
+  fileSize    Int?
+  description String?
+  uploadDate  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // İlişkiler
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+  tenantId   String?
+  tenant     Tenant?  @relation(fields: [tenantId], references: [id])
+}
+
+model PropertyMaintenance {
+  id              String    @id @default(uuid())
+  title           String
+  description     String?
+  cost            Float?
+  date            DateTime
+  completedAt     DateTime?
+  maintenanceType String // Düzenli bakım, acil tamir, yenileme, vs.
+  contractor      String? // Çalışmayı yapan firma veya kişi
+  invoiceNumber   String?
+  warranty        DateTime? // Garantinin bitiş tarihi
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // İlişkiler
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+  tenantId   String?
+  tenant     Tenant?  @relation(fields: [tenantId], references: [id])
+}
+
+// =========== KİRA YÖNETİMİ ===========
+
+enum ContractStatus {
+  ACTIVE
+  EXPIRED
+  TERMINATED
+  PENDING
+  RENEWED
+}
+
+enum RenewalType {
+  AUTOMATIC
+  MANUAL
+  NEGOTIABLE
+}
+
+model RentalContract {
+  id            String         @id @default(uuid())
+  title         String
+  status        ContractStatus @default(ACTIVE)
+  startDate     DateTime
+  endDate       DateTime
+  monthlyRent   Float
+  depositAmount Float
+  paymentDay    Int
+  paymentMethod String?
+  renewalType   RenewalType?
+  noticePeriod  Int?
+  indexType     String?
+  notes         String?
+
+  // Sonlandırma alanları
+  terminationDate     DateTime?
+  terminationReason   String?
+  penaltyAmount       Float?
+  returnDepositAmount Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // İlişkiler
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+
+  tenantId String
+  tenant   User   @relation("Tenant", fields: [tenantId], references: [id])
+
+  tenantOrgId String?
+  tenantOrg   Tenant? @relation(fields: [tenantOrgId], references: [id])
+
+  payments  RentalPayment[]
+  deposits  Deposit[]
+  documents Document[]
+
+  previousContractId String?
+  previousContract   RentalContract?   @relation("ContractRenewal", fields: [previousContractId], references: [id])
+  renewedContracts   RentalContract[]  @relation("ContractRenewal")
+  ContractRenewal    ContractRenewal[]
+  LegalCase          LegalCase[]
+}
+
+model RentalPayment {
+  id              String   @id @default(uuid())
+  amount          Float
+  paymentDate     DateTime
+  periodStartDate DateTime
+  periodEndDate   DateTime
+  paymentMethod   String?
+  receiptNumber   String?
+  isPaid          Boolean  @default(false)
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  contractId    String
+  contract      RentalContract @relation(fields: [contractId], references: [id])
+  Transaction   Transaction?   @relation(fields: [transactionId], references: [id])
+  transactionId String?
+}
+
+model ContractRenewal {
+  id            String   @id @default(uuid())
+  previousRent  Float
+  newRent       Float
+  renewalDate   DateTime
+  effectiveDate DateTime
+  inflationRate Float?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now())
+
+  // İlişkiler
+  contractId String
+  contract   RentalContract @relation(fields: [contractId], references: [id])
+}
+
+model Deposit {
+  id           String    @id @default(uuid())
+  amount       Float
+  receivedDate DateTime
+  paymentDate  DateTime
+  returnDate   DateTime?
+  status       String
+  returnAmount Float?
+  notes        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now())
+
+  // İlişkiler
+  contractId String
+  contract   RentalContract @relation(fields: [contractId], references: [id])
+}
+
+// =========== AİDAT YÖNETİMİ ===========
+
+model Building {
+  id               String   @id @default(uuid())
+  name             String
+  address          String
+  city             String
+  district         String
+  totalUnits       Int
+  constructionYear Int?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now())
+
+  // İlişkiler
+  managerId  String
+  manager    User              @relation("BuildingManager", fields: [managerId], references: [id])
+  properties Property[]
+  expenses   BuildingExpense[]
+  dues       Dues[]
+  tenantId   String?
+  tenant     Tenant?           @relation(fields: [tenantId], references: [id])
+}
+
+model Dues {
+  id          String   @id @default(uuid())
+  period      DateTime // Hangi aya ait
+  amount      Float
+  dueDate     DateTime
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+
+  // İlişkiler
+  buildingId String
+  building   Building      @relation(fields: [buildingId], references: [id])
+  payments   DuesPayment[]
+}
+
+model DuesPayment {
+  id          String    @id @default(uuid())
+  amount      Float
+  paymentDate DateTime?
+  isPaid      Boolean   @default(false)
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+
+  // İlişkiler
+  duesId        String
+  dues          Dues         @relation(fields: [duesId], references: [id])
+  transactionId String?
+  transaction   Transaction? @relation(fields: [transactionId], references: [id])
+}
+
+model BuildingExpense {
+  id            String    @id @default(uuid())
+  title         String
+  description   String?
+  amount        Float
+  expenseDate   DateTime
+  expenseType   String // Elektrik, su, doğalgaz, vs.
+  invoiceNumber String?
+  isPaid        Boolean   @default(false)
+  paidAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now())
+
+  // İlişkiler
+  buildingId String
+  building   Building @relation(fields: [buildingId], references: [id])
+}
+
+// =========== FİNANSAL YÖNETİM ===========
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CREDIT_CARD
+  CHECK
+  ONLINE_PAYMENT
+}
+
+model Transaction {
+  id              String          @id @default(uuid())
+  amount          Float
+  type            TransactionType
+  description     String?
+  paymentMethod   PaymentMethod
+  transactionDate DateTime
+  notes           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  // İlişkiler
+  userId         String
+  user           User            @relation("TransactionUser", fields: [userId], references: [id])
+  rentalPayments RentalPayment[]
+  duesPayments   DuesPayment[]
+  tenantId       String?
+  tenant         Tenant?         @relation(fields: [tenantId], references: [id])
+}
+
+// =========== BAKIM/ARIZA YÖNETİMİ ===========
+
+enum RequestStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum RequestPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model MaintenanceRequest {
+  id            String          @id @default(uuid())
+  title         String
+  description   String
+  status        RequestStatus   @default(OPEN)
+  priority      RequestPriority @default(MEDIUM)
+  requestDate   DateTime        @default(now())
+  completedDate DateTime?
+  notes         String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  // İlişkiler
+  requestedById String
+  requestedBy   User              @relation("RequestedBy", fields: [requestedById], references: [id])
+  propertyId    String?
+  // İlişki eklenecek
+  tasks         MaintenanceTask[]
+  tenantId      String?
+  tenant        Tenant?           @relation(fields: [tenantId], references: [id])
+}
+
+model MaintenanceTask {
+  id            String        @id @default(uuid())
+  title         String
+  description   String?
+  cost          Float?
+  scheduledDate DateTime?
+  completedDate DateTime?
+  status        RequestStatus @default(OPEN)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // İlişkiler
+  maintenanceRequestId String
+  maintenanceRequest   MaintenanceRequest @relation(fields: [maintenanceRequestId], references: [id])
+  assignedToId         String?
+  assignedTo           User?              @relation("AssignedTo", fields: [assignedToId], references: [id])
+}
+
+// =========== DOKÜMAN YÖNETİMİ ===========
+
+model Document {
+  id        String   @id @default(uuid())
+  title     String
+  fileUrl   String
+  mimeType  String
+  size      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  // RentalContract ile ilişki
+  contractId String?
+  contract   RentalContract? @relation(fields: [contractId], references: [id])
+
+  // User ile ilişki
+  ownerId String?
+  owner   User?   @relation("DocumentOwner", fields: [ownerId], references: [id])
+
+  // Tenant ile ilişki
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+}
+
+// Tenant modeli
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  domain    String?  @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  // İlişkiler
+  users                User[]
+  properties           Property[]
+  buildings            Building[]
+  rentalContracts      RentalContract[]
+  maintenanceRequests  MaintenanceRequest[]
+  transactions         Transaction[]
+  documents            Document[]
+  notifications        Notification[]
+  calendarEvents       CalendarEvent[]
+  conversations        Conversation[]
+  auditLogs            AuditLog[]
+  sessions             Session[]
+  propertyDocuments    PropertyDocument[]
+  propertyMaintenances PropertyMaintenance[]
+  LegalCase            LegalCase[]
+  CustomField          CustomField[]
+  Report               Report[]
+  Translation          Translation[]
+  Setting              Setting[]
+}
+
+// =========== BİLDİRİM YÖNETİMİ ===========
+
+enum NotificationType {
+  EMAIL
+  SMS
+  IN_APP
+  PUSH
+}
+
+model Notification {
+  id      String           @id @default(uuid())
+  title   String
+  message String
+  type    NotificationType @default(IN_APP)
+  isRead  Boolean          @default(false)
+  sentAt  DateTime         @default(now())
+  readAt  DateTime?
+
+  // İlişkiler
+  userId   String
+  user     User    @relation(fields: [userId], references: [id])
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+}
+
+// =========== TAKVİM VE HATIRLATICILAR ===========
+
+enum CalendarEventType {
+  RENT_DUE
+  CONTRACT_EXPIRY
+  MAINTENANCE
+  MEETING
+  CUSTOM
+}
+
+model CalendarEvent {
+  id              String            @id @default(uuid())
+  title           String
+  description     String?
+  startDate       DateTime
+  endDate         DateTime?
+  isAllDay        Boolean           @default(false)
+  type            CalendarEventType
+  relatedEntityId String? // Bağlantılı nesnenin ID'si (sözleşme, bakım, vb.)
+  location        String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @default(now())
+
+  // İlişkiler
+  userId    String
+  user      User            @relation(fields: [userId], references: [id])
+  tenantId  String?
+  tenant    Tenant?         @relation(fields: [tenantId], references: [id])
+  attendees EventAttendee[]
+  reminders EventReminder[]
+}
+
+model EventAttendee {
+  id      String        @id @default(uuid())
+  userId  String
+  user    User          @relation(fields: [userId], references: [id])
+  eventId String
+  event   CalendarEvent @relation(fields: [eventId], references: [id])
+  status  String        @default("PENDING") // PENDING, ACCEPTED, DECLINED
+
+  @@unique([userId, eventId])
+}
+
+model EventReminder {
+  id               String           @id @default(uuid())
+  eventId          String
+  event            CalendarEvent    @relation(fields: [eventId], references: [id])
+  reminderTime     DateTime
+  notificationType NotificationType @default(IN_APP)
+  isSent           Boolean          @default(false)
+  sentAt           DateTime?
+}
+
+// =========== DAVA VE HUKUKİ SÜREÇ ===========
+
+enum LegalCaseType {
+  EVICTION
+  DEBT_COLLECTION
+  PROPERTY_DAMAGE
+  CONTRACT_DISPUTE
+  OTHER
+}
+
+enum LegalCaseStatus {
+  DRAFT
+  FILED
+  IN_PROGRESS
+  COURT_DATE_SET
+  AWAITING_DECISION
+  COMPLETED
+  CANCELLED
+  APPEAL
+}
+
+model LegalCase {
+  id              String          @id @default(uuid())
+  caseNumber      String?
+  title           String
+  description     String
+  type            LegalCaseType
+  status          LegalCaseStatus @default(DRAFT)
+  filingDate      DateTime?
+  courtDate       DateTime?
+  completionDate  DateTime?
+  outcome         String?
+  courtName       String?
+  judgeInfo       String?
+  attorneyName    String?
+  attorneyContact String?
+  estimatedCost   Float?
+  actualCost      Float?
+  notes           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @default(now())
+
+  // İlişkiler
+  propertyId String?
+  property   Property?       @relation(fields: [propertyId], references: [id])
+  contractId String?
+  contract   RentalContract? @relation(fields: [contractId], references: [id])
+  userId     String
+  user       User            @relation(fields: [userId], references: [id])
+  tenantId   String?
+  tenant     Tenant?         @relation(fields: [tenantId], references: [id])
+  documents  LegalDocument[]
+  events     LegalEvent[]
+}
+
+model LegalDocument {
+  id           String    @id @default(uuid())
+  title        String
+  fileUrl      String
+  documentType String
+  filingDate   DateTime?
+  notes        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now())
+
+  // İlişkiler
+  caseId String
+  case   LegalCase @relation(fields: [caseId], references: [id])
+}
+
+model LegalEvent {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  eventDate   DateTime
+  location    String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+
+  // İlişkiler
+  caseId String
+  case   LegalCase @relation(fields: [caseId], references: [id])
+}
+
+// =========== MESAjLAŞMA SİSTEMİ ===========
+
+model Conversation {
+  id        String   @id @default(uuid())
+  title     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  // İlişkiler
+  participants ConversationParticipant[]
+  messages     Message[]
+  tenantId     String?
+  tenant       Tenant?                   @relation(fields: [tenantId], references: [id])
+}
+
+model ConversationParticipant {
+  id             String       @id @default(uuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  lastReadAt     DateTime?
+
+  @@unique([userId, conversationId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  content        String
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id])
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  sentAt         DateTime     @default(now())
+  isRead         Boolean      @default(false)
+
+  // İlişkiler
+  attachments MessageAttachment[]
+}
+
+model MessageAttachment {
+  id        String   @id @default(uuid())
+  fileUrl   String
+  fileName  String
+  fileType  String
+  fileSize  Int
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+// =========== ÖZEL ALAN VE ÖZELLEŞTİRME ===========
+
+enum CustomFieldType {
+  TEXT
+  NUMBER
+  DATE
+  BOOLEAN
+  SELECT
+  MULTI_SELECT
+}
+
+model CustomField {
+  id          String          @id @default(uuid())
+  name        String
+  label       String
+  type        CustomFieldType
+  required    Boolean         @default(false)
+  options     String? // JSON string olarak saklanan seçenekler
+  entityType  String // "Property", "User", "Contract" gibi uygulanacağı entite
+  description String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @default(now())
+
+  // İlişkiler
+  tenantId String?
+  tenant   Tenant?            @relation(fields: [tenantId], references: [id])
+  values   CustomFieldValue[]
+}
+
+model CustomFieldValue {
+  id        String      @id @default(uuid())
+  fieldId   String
+  field     CustomField @relation(fields: [fieldId], references: [id])
+  entityId  String // Bağlı olduğu nesnenin ID'si
+  value     String // JSON olarak saklanan değer
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @default(now())
+
+  @@unique([fieldId, entityId])
+}
+
+// =========== İSTATİSTİK VE RAPORLAMA ===========
+
+model Report {
+  id            String    @id @default(uuid())
+  name          String
+  description   String?
+  reportType    String // "financial", "occupancy", "maintenance" gibi
+  parameters    String? // JSON formatında rapor parametreleri
+  lastGenerated DateTime?
+  scheduleType  String? // "daily", "weekly", "monthly" 
+  nextSchedule  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now())
+
+  // İlişkiler
+  userId      String
+  user        User               @relation(fields: [userId], references: [id])
+  tenantId    String?
+  tenant      Tenant?            @relation(fields: [tenantId], references: [id])
+  generations ReportGeneration[]
+}
+
+model ReportGeneration {
+  id          String    @id @default(uuid())
+  reportId    String
+  report      Report    @relation(fields: [reportId], references: [id])
+  fileUrl     String?
+  status      String    @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  generatedAt DateTime  @default(now())
+  completedAt DateTime?
+  parameters  String? // Kullanılan parametreler
+  error       String?
+
+  // İlişkiler
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+// =========== ÇOK DİLLİ DESTEK ===========
+
+model Language {
+  id        String   @id @default(uuid())
+  code      String   @unique // "tr", "en" gibi
+  name      String
+  isActive  Boolean  @default(true)
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  // İlişkiler
+  translations Translation[]
+}
+
+model Translation {
+  id         String   @id @default(uuid())
+  key        String
+  value      String
+  languageId String
+  language   Language @relation(fields: [languageId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+
+  // İlişkiler
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+
+  @@unique([key, languageId, tenantId])
+}
+
+// =========== AYARLAR VE KONFIGÜRASYON ===========
+
+model Setting {
+  id          String   @id @default(uuid())
+  key         String
+  value       String // JSON olarak saklanan ayar değeri
+  category    String? // "general", "email", "payment" gibi
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+
+  // İlişkiler
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+
+  @@unique([key, tenantId])
+}
+
+// =========== GÜVENLİK VE OTURUM YÖNETİMİ ===========
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  token        String   @unique
+  ipAddress    String?
+  userAgent    String?
+  lastActivity DateTime @default(now())
+  expiresAt    DateTime
+  isValid      Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  // İlişkiler
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String // "create", "update", "delete", "login" gibi
+  entityType String // "User", "Property", "Contract" gibi
+  entityId   String?
+  oldValues  String? // JSON olarak değişiklik öncesi
+  newValues  String? // JSON olarak değişiklik sonrası
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  // İlişkiler
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
