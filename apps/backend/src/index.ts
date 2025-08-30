@@ -47,7 +47,7 @@ async function buildApp() {
         url: "https://rentino-web.vercel.app",
         description: "Rentino web sitesi",
       },
-      host: `${HOST}:${PORT}`,
+      host: `rentino-production.up.railway.app`,
       schemes: ["http", "https"],
       consumes: ["application/json"],
       produces: ["application/json"],
