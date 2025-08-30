@@ -3,12 +3,6 @@ import { extractTenantInfo } from "../utils";
 import { Tenant, TenantResolution, AuthUserPayload } from "../types";
 import { validateTenantAccess } from "../validators";
 
-declare module "fastify" {
-  interface FastifyRequest {
-    tenant?: Tenant;
-  }
-}
-
 type FastifyRequestWithUser = FastifyRequest & {
   user?: AuthUserPayload;
 };
@@ -20,9 +14,16 @@ export interface TenantMiddlewareOptions {
 }
 
 export function createTenantResolver(options: TenantMiddlewareOptions) {
-  const { prisma, enableCrossTenantForAdmin = true, strictMode = false } = options;
+  const {
+    prisma,
+    enableCrossTenantForAdmin = true,
+    strictMode = false,
+  } = options;
 
-  return async function resolveTenant(request: FastifyRequest, reply: FastifyReply): Promise<Tenant | null> {
+  return async function resolveTenant(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<Tenant | null> {
     const req = request as unknown as FastifyRequestWithUser;
     try {
       const tenantId = request.headers["x-tenant-id"] as string;
@@ -36,11 +37,19 @@ export function createTenantResolver(options: TenantMiddlewareOptions) {
       } else if (jwtTenantId) {
         tenant = await findTenantById(prisma, jwtTenantId);
       } else if (tenantInfo.subdomain || tenantInfo.domain) {
-        tenant = await findTenantByDomain(prisma, tenantInfo.domain, tenantInfo.subdomain);
+        tenant = await findTenantByDomain(
+          prisma,
+          tenantInfo.domain,
+          tenantInfo.subdomain
+        );
       }
 
       if (tenant && req.user) {
-        const hasAccess = validateTenantAccess(req.user.role, req.user.tenantId || undefined, tenant.id);
+        const hasAccess = validateTenantAccess(
+          req.user.role,
+          req.user.tenantId || undefined,
+          tenant.id
+        );
 
         if (!hasAccess && strictMode) {
           throw new Error("Cross-tenant access denied");
@@ -55,7 +64,10 @@ export function createTenantResolver(options: TenantMiddlewareOptions) {
   };
 }
 
-async function findTenantById(prisma: any, tenantId: string): Promise<Tenant | null> {
+async function findTenantById(
+  prisma: any,
+  tenantId: string
+): Promise<Tenant | null> {
   return await prisma.tenant.findUnique({
     where: { id: tenantId, isActive: true },
     select: {
@@ -69,12 +81,19 @@ async function findTenantById(prisma: any, tenantId: string): Promise<Tenant | n
   });
 }
 
-async function findTenantByDomain(prisma: any, domain?: string, subdomain?: string): Promise<Tenant | null> {
+async function findTenantByDomain(
+  prisma: any,
+  domain?: string,
+  subdomain?: string
+): Promise<Tenant | null> {
   if (!domain && !subdomain) return null;
 
   return await prisma.tenant.findFirst({
     where: {
-      OR: [domain ? { domain } : {}, subdomain ? { domain: subdomain } : {}].filter(Boolean),
+      OR: [
+        domain ? { domain } : {},
+        subdomain ? { domain: subdomain } : {},
+      ].filter(Boolean),
       isActive: true,
     },
     select: {
