@@ -28,6 +28,7 @@ async function buildApp() {
       "https://rentino-web.vercel.app",
       /https:\/\/.*\.vercel\.app$/,
       process.env.FRONTEND_URL || "http://localhost:3000",
+      "https://rentino-production.up.railway.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
