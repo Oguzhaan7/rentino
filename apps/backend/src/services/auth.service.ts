@@ -5,7 +5,7 @@ import {
   SignupBody,
   SigninBody,
   ChangePasswordBody,
-} from "../types/auth.types";
+} from "../types/auth.types.js";
 
 async function hashPassword(password: string): Promise<string> {
   const saltRounds = 12;

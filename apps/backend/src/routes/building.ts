@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
-import { buildingService } from "../services/building.service";
-import { buildingSchemas } from "../schemas/building.schema";
+import { buildingService } from "../services/building.service.js";
+import { buildingSchemas } from "../schemas/building.schema.js";
 
 export default async function buildingRoutes(
   fastify: FastifyInstance

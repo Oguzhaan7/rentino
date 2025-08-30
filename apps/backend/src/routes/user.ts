@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { userService } from "../services/user.service";
+import { userService } from "../services/user.service.js";
 
 export default async function userRoutes(
   fastify: FastifyInstance

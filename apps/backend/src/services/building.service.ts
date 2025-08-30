@@ -7,7 +7,7 @@ import {
   validateResourceAccess,
   requireTenant,
   requireAuth,
-} from "../utils/tenant";
+} from "../utils/tenant.js";
 import {
   CreateBuildingBody,
   UpdateBuildingBody,
@@ -18,7 +18,7 @@ import {
   CreateDuesBody,
   BuildingExpenseParam,
   BuildingDuesParam,
-} from "../types/building.types";
+} from "../types/building.types.js";
 
 export const buildingService = {
   async createBuilding(

@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
-import { contractService } from "../services/contract.service";
-import { contractSchemas } from "../schemas/contract.schema";
+import { contractService } from "../services/contract.service.js";
+import { contractSchemas } from "../schemas/contract.schema.js";
 
 export default async function contractRoutes(
   fastify: FastifyInstance

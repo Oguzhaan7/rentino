@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
-import { propertyService } from "../services/property.service";
-import { propertySchemas } from "../schemas/property.schema";
+import { propertyService } from "../services/property.service.js";
+import { propertySchemas } from "../schemas/property.schema.js";
 
 export default async function propertyRoutes(
   fastify: FastifyInstance

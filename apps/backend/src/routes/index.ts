@@ -1,13 +1,13 @@
 import { FastifyInstance } from "fastify";
-import authRoutes from "./auth";
-import tenantRoutes from "./tenant";
-import rentalTenantRoutes from "./rental-tenant";
-import propertyRoutes from "./property";
-import buildingRoutes from "./building";
-import contractRoutes from "./contract";
-import userRoutes from "./user";
-import roleRoutes from "./role";
-import settingsRoutes from "./settings";
+import authRoutes from "./auth.js";
+import tenantRoutes from "./tenant.js";
+import rentalTenantRoutes from "./rental-tenant.js";
+import propertyRoutes from "./property.js";
+import buildingRoutes from "./building.js";
+import contractRoutes from "./contract.js";
+import userRoutes from "./user.js";
+import roleRoutes from "./role.js";
+import settingsRoutes from "./settings.js";
 
 export default async function registerRoutes(fastify: FastifyInstance) {
   // Health check endpoint

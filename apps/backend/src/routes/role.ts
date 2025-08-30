@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
-import { roleService } from "../services/role.service";
-import { roleSchemas } from "../schemas/role.schema";
+import { roleService } from "../services/role.service.js";
+import { roleSchemas } from "../schemas/role.schema.js";
 
 export default async function roleRoutes(
   fastify: FastifyInstance

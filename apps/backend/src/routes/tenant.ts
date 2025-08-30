@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
-import { tenantService } from "../services/tenant.service";
-import { tenantSchemas } from "../schemas/tenant.schema";
+import { tenantService } from "../services/tenant.service.js";
+import { tenantSchemas } from "../schemas/tenant.schema.js";
 
 export default async function tenantRoutes(
   fastify: FastifyInstance

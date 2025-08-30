@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { prisma, Prisma } from "database";
-import { isAdmin, requireAuth } from "../utils/tenant";
+import { isAdmin, requireAuth } from "../utils/tenant.js";
 
 export const tenantService = {
   async createTenant(request: FastifyRequest, reply: FastifyReply) {

@@ -9,7 +9,7 @@ import {
   TerminateContractBody,
   AddRentPaymentBody,
   RentPaymentParam,
-} from "../types/contract.types";
+} from "../types/contract.types.js";
 import {
   getTenantId,
   isAdmin,
@@ -17,7 +17,7 @@ import {
   validateResourceAccess,
   requireTenant,
   requireAuth,
-} from "../utils/tenant";
+} from "../utils/tenant.js";
 
 type ContractStatus = "ACTIVE" | "TERMINATED" | "EXPIRED" | "RENEWED";
 

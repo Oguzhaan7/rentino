@@ -1,4 +1,4 @@
-import { Tenant, TenantResolution } from "../types";
+import { Tenant, TenantResolution } from "../types/index.js";
 
 export const RESERVED_SUBDOMAINS = [
   "www",

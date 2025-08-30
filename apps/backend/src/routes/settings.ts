@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { settingsService } from "../services/settings.service";
+import { settingsService } from "../services/settings.service.js";
 
 export default async function settingsRoutes(
   fastify: FastifyInstance

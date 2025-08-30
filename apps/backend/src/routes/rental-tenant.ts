@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
-import { rentalTenantService } from "../services/rental-tenant.service";
-import { rentalTenantSchemas } from "../schemas/rental-tenant.schema";
+import { rentalTenantService } from "../services/rental-tenant.service.js";
+import { rentalTenantSchemas } from "../schemas/rental-tenant.schema.js";
 
 export default async function rentalTenantRoutes(
   fastify: FastifyInstance

@@ -1,4 +1,4 @@
-import { RESERVED_SUBDOMAINS } from "../utils";
+import { RESERVED_SUBDOMAINS } from "../utils/index.js";
 
 export const validateTenantAccess = (
   userRole: string,

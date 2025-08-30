@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { authService } from "../services/auth.service";
+import { authService } from "../services/auth.service.js";
 import {
   signupSchema,
   signinSchema,
@@ -7,7 +7,7 @@ import {
   changePasswordSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
-} from "../schemas/auth.schema";
+} from "../schemas/auth.schema.js";
 
 export default async function authRoutes(
   fastify: FastifyInstance

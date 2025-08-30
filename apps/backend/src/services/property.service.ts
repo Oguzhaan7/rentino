@@ -7,7 +7,7 @@ import {
   validateResourceAccess,
   requireTenant,
   requireAuth,
-} from "../utils/tenant";
+} from "../utils/tenant.js";
 
 export const propertyService = {
   async createProperty(request: FastifyRequest, reply: FastifyReply) {

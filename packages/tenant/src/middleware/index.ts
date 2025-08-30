@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { extractTenantInfo } from "../utils";
-import { Tenant, TenantResolution, AuthUserPayload } from "../types";
-import { validateTenantAccess } from "../validators";
+import { extractTenantInfo } from "../utils/index.js";
+import { Tenant, TenantResolution, AuthUserPayload } from "../types/index.js";
+import { validateTenantAccess } from "../validators/index.js";
 
 type FastifyRequestWithUser = FastifyRequest & {
   user?: AuthUserPayload;

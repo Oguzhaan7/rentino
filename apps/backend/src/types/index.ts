@@ -1,2 +1,2 @@
-export * from "./auth.types";
-export * from "./tenant.types";
+export * from "./auth.types.js";
+export * from "./tenant.types.js";

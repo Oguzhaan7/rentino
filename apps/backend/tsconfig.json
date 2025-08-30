@@ -9,7 +9,7 @@
     "skipLibCheck": true,
     "paths": {
       "auth": ["../../packages/auth/src"],
-      "tenant": ["../../packages/tenant/src"]
+      "tenant": ["../../packages/tenant/dist"]
     }
   },
   "include": ["src/**/*"]

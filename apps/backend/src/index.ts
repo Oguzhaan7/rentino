@@ -4,12 +4,14 @@ import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import cors from "@fastify/cors";
 
-import plugins from "./plugins";
-import registerRoutes from "./routes";
+import plugins from "./plugins/index.js";
+import registerRoutes from "./routes/index.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "rentino-gizli-anahtar";
 const PORT =
-  process.env.PORT || process.env.SERVER_PORT ? parseInt(process.env.SERVER_PORT || process.env.PORT || "5000") : 5000;
+  process.env.PORT || process.env.SERVER_PORT
+    ? parseInt(process.env.SERVER_PORT || process.env.PORT || "5000")
+    : 5000;
 const HOST = process.env.HOST || process.env.SERVER_HOST || "0.0.0.0";
 const NODE_ENV = process.env.NODE_ENV || "development";
 
@@ -36,7 +38,8 @@ async function buildApp() {
     swagger: {
       info: {
         title: "Rentino API Dokümantasyonu",
-        description: "Rentino emlak ve kira yönetimi platformu API dokümantasyon",
+        description:
+          "Rentino emlak ve kira yönetimi platformu API dokümantasyon",
         version: "1.0.0",
       },
       externalDocs: {
@@ -98,7 +101,10 @@ async function buildApp() {
 
     return reply.status(500).send({
       error: "Sunucu hatası",
-      message: NODE_ENV === "production" ? "Beklenmedik bir hata oluştu" : error.message,
+      message:
+        NODE_ENV === "production"
+          ? "Beklenmedik bir hata oluştu"
+          : error.message,
     });
   });
 
@@ -110,15 +116,15 @@ async function start() {
     const app = await buildApp();
     await app.listen({ port: PORT, host: HOST });
     app.log.info(`Server running at http://${HOST}:${PORT}`);
-    app.log.info(`Swagger documentation available at http://${HOST}:${PORT}/swagger`);
+    app.log.info(
+      `Swagger documentation available at http://${HOST}:${PORT}/swagger`
+    );
   } catch (err) {
     console.error("Server start failed:", err);
     process.exit(1);
   }
 }
 
-if (require.main === module) {
-  start();
-}
+start();
 
 export { buildApp };
